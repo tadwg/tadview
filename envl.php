@@ -17,6 +17,6 @@ function hook_start() {
 $systeminfo->fontpath = '/var/www/html/fonts/';
 $systeminfo->pdffontname = "KozMinPro-Regular-Acro";
 $systeminfo->pdflicense = "0";
-$systeminfo->zfpath = "/home/guest/zf/library/";
+$systeminfo->zfpath = "/var/www/html/ZendFramework-1.12.18-minimal/library/";
 
 ?>
