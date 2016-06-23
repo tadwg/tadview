@@ -522,7 +522,7 @@ abstract class Zend_Pdf_Resource_Font extends Zend_Pdf_Resource
     public function toEmSpace($value)
     {
         if ($this->_unitsPerEm == 1000) {
-            return $value;
+            return $value + 0;
         }
         return ceil(($value / $this->_unitsPerEm) * 1000);    // always round up
     }

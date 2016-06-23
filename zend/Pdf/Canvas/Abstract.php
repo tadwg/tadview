@@ -31,9 +31,6 @@ require_once 'Zend/Pdf/Element/Name.php';
 require_once 'Zend/Pdf/Element/Null.php';
 require_once 'Zend/Pdf/Element/Numeric.php';
 require_once 'Zend/Pdf/Element/String.php';
-require_once 'Zend/Pdf/Resource/GraphicsState.php';
-require_once 'Zend/Pdf/Resource/Font.php';
-require_once 'Zend/Pdf/Resource/Image.php';
 
 
 /**
@@ -1057,6 +1054,28 @@ abstract class Zend_Pdf_Canvas_Abstract implements Zend_Pdf_Canvas_Interface
         return $this;
     }
 
+    public function getTextWidth($text, $charEncoding = '', $font = null, $fontSize = 0)
+    {
+    	if ($font === null)
+    		$font = $this->_font;
+    	if ($fontSize <= 0)
+    		$fontSize = $this->_fontSize;
+        if ($font === null) {
+            require_once 'Zend/Pdf/Exception.php';
+            throw new Zend_Pdf_Exception('Font has not been set');
+        }
+
+	$s = iconv($charEncoding, 'UTF-16BE', $text);
+	$width = 0;
+	for ($pos=0; $pos<strlen($s); $pos+=2) {
+		$c = ord(substr($s, $pos, 1)) << 8;
+		$c |= ord(substr($s, $pos + 1, 1));
+		$width += $font->toEmSpace($font->widthForGlyph($font->glyphNumberForCharacter($c)));
+	}
+	$width = $width * $fontSize / 1000;
+        return $width;
+    }
+
      /**
      * Close the path by drawing a straight line back to it's beginning.
      *
@@ -1191,6 +1210,21 @@ abstract class Zend_Pdf_Canvas_Abstract implements Zend_Pdf_Canvas_Interface
         $this->_contents .= '1 0 0 1 ' . $xObj->toString() . ' ' . $yObj->toString() . " cm\n"
                          .  '1 ' . $tanXObj->toString() . ' ' . $tanYObj->toString() . " 1 0 0 cm\n"
                          .  '1 0 0 1 ' . $mXObj->toString() . ' ' . $mYObj->toString() . " cm\n";
+
+        return $this;
+    }
+
+    public function concat($v0, $v1, $v2, $v3, $v4, $v5)
+    {
+        $v0Obj = new Zend_Pdf_Element_Numeric($v0);
+        $v1Obj = new Zend_Pdf_Element_Numeric($v1);
+        $v2Obj = new Zend_Pdf_Element_Numeric($v2);
+        $v3Obj = new Zend_Pdf_Element_Numeric($v3);
+        $v4Obj = new Zend_Pdf_Element_Numeric($v4);
+        $v5Obj = new Zend_Pdf_Element_Numeric($v5);
+
+        $this->_addProcSet('PDF');
+        $this->_contents .= $v0Obj->toString() . ' ' . $v1Obj->toString() . ' ' . $v2Obj->toString() . ' ' . $v3Obj->toString() . ' ' . $v4Obj->toString() . ' ' . $v5Obj->toString() . " cm\n";
 
         return $this;
     }

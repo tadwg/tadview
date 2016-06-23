@@ -596,6 +596,13 @@ abstract class Zend_Pdf_Font
             return Zend_Pdf_Font::$_fontFilePaths[$filePathKey];
         }
 
+/* ttc patch */
+	$ttcNumber = 0;
+	if (eregi('^(.*\.ttc):([0-9]+)$', $filePath, $array)) {
+		$filePath = $array[1];
+		$ttcNumber = $array[2] + 0;
+	}
+
         /* Create a file parser data source object for this file. File path and
          * access permission checks are handled here.
          */
@@ -613,6 +620,10 @@ abstract class Zend_Pdf_Font
         switch ($fileExtension) {
             case 'ttf':
                 $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions);
+                break;
+
+            case 'ttc':
+                $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions, $ttcNumber);
                 break;
 
             default:
@@ -692,11 +703,16 @@ abstract class Zend_Pdf_Font
      *   the data source does not appear to contain a TrueType font.
      * @throws Zend_Pdf_Exception
      */
-    protected static function _extractTrueTypeFont($dataSource, $embeddingOptions)
+    protected static function _extractTrueTypeFont($dataSource, $embeddingOptions, $ttcNumber = -1)
     {
         try {
-            require_once 'Zend/Pdf/FileParser/Font/OpenType/TrueType.php';
-            $fontParser = new Zend_Pdf_FileParser_Font_OpenType_TrueType($dataSource);
+            if ($ttcNumber < 0) {
+                require_once 'Zend/Pdf/FileParser/Font/OpenType/TrueType.php';
+                $fontParser = new Zend_Pdf_FileParser_Font_OpenType_TrueType($dataSource);
+            } else {
+                require_once 'Zend/Pdf/FileParser/Font/OpenType/TrueTypeCollection.php';
+                $fontParser = new Zend_Pdf_FileParser_Font_OpenType_TrueTypeCollection($dataSource, $ttcNumber);
+            }
 
             $fontParser->parse();
             if ($fontParser->isAdobeLatinSubset) {
