@@ -14,7 +14,7 @@ function hook_start() {
 	ini_set("ignore_user_abort", "0");	# abort when session disconnect
 }
 
-$systeminfo->fontpath = '/var/www/font/';
+$systeminfo->fontpath = '/var/www/html/fonts/';
 $systeminfo->pdffontname = "KozMinPro-Regular-Acro";
 $systeminfo->pdflicense = "0";
 $systeminfo->zfpath = "/home/guest/zf/library/";
