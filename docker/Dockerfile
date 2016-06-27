@@ -52,7 +52,8 @@ RUN \
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/TMincho-GT10.ttc' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/TMincho-GT11.ttc' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/TMincho-GT12.ttc' &&\
-	wget 'https://github.com/tadwg/tadview/raw/master/fonts/TMincho-GT13.ttc'
+	wget 'https://github.com/tadwg/tadview/raw/master/fonts/TMincho-GT13.ttc' &&\
+	wget 'https://github.com/tadwg/tadview/raw/master/fonts/koganei.ttf'
 RUN \
 	set -x &&\
 	cd /var/www/html/ &&\
