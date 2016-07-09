@@ -1,5 +1,7 @@
 <?php
 $systeminfo->welcomemessage = <<<EOO
+<HR>
+<P align="right">&copy; <A href="http://www.tad-wg.jp/">TAD Working Group</A>, 2002-2016</P>
 <!-- write message here -->
 <!-- write message here -->
 <!-- write message here -->
