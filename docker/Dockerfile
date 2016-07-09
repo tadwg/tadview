@@ -1,15 +1,13 @@
-FROM paijp/centos6-apache-php-sqlite2
+FROM paijp/centos6-apache-php-sqlite2-pdflib
 
 RUN \
 	set -x &&\
-	yum clean all &&\
 	yum -y install php-gd php-mbstring wget
 RUN \
 	set -x &&\
 	cd /var/www/html/ &&\
 	mkdir -p fonts &&\
 	cd fonts &&\
-	wget 'https://github.com/tadwg/tadview/raw/master/fonts/tcmap.sq2' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/ipag.ttf' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/ipagp.ttf' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/ipam.ttf' &&\
@@ -74,6 +72,8 @@ RUN \
 RUN \
 	set -x &&\
 	cd /var/www/html/ &&\
+	wget 'https://github.com/tadwg/tadview/raw/master/index.html' &&\
+	wget 'https://github.com/tadwg/tadview/raw/master/ath.txt' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/env.php' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/envl.php' &&\
 	wget 'https://github.com/tadwg/tadview/raw/master/tadview.php' &&\
@@ -83,5 +83,4 @@ RUN \
 	wget 'https://github.com/tadwg/tadview/raw/master/fonts/tcmap.sq2'
 
 EXPOSE 80 443
-ENTRYPOINT /usr/sbin/httpd -D FOREGROUND
-CMD tail -f /var/log/httpd/access_log
+CMD apachectl start&&tail -f /var/log/httpd/access_log
