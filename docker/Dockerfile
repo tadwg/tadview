@@ -1,4 +1,4 @@
-FROM paijp/centos6-apache-php-sqlite2-pdflib
+FROM paijp/centos6-apache-php-sqlite2-pdflib:latest
 
 RUN \
 	set -x &&\
