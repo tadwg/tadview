@@ -15,9 +15,9 @@
  * @category   Zend
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
- * @version    $Id$
+ * @version    $Id: Font.php 23775 2011-03-01 17:25:24Z ralph $
  */
 
 
@@ -33,7 +33,7 @@
  *
  * @package    Zend_Pdf
  * @subpackage Fonts
- * @copyright  Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @copyright  Copyright (c) 2005-2011 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
 abstract class Zend_Pdf_Font
@@ -607,7 +607,7 @@ abstract class Zend_Pdf_Font
          * access permission checks are handled here.
          */
         require_once 'Zend/Pdf/FileParserDataSource/File.php';
-        $dataSource = new Zend_Pdf_FileParserDataSource_File($filePath);
+#        $dataSource = new Zend_Pdf_FileParserDataSource_File($filePath);
 
         /* Attempt to determine the type of font. We can't always trust file
          * extensions, but try that first since it's fastest.
@@ -619,11 +619,39 @@ abstract class Zend_Pdf_Font
          */
         switch ($fileExtension) {
             case 'ttf':
+		$dataSource = new Zend_Pdf_FileParserDataSource_File($filePath);
                 $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions);
                 break;
 
             case 'ttc':
-                $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions, $ttcNumber);
+#                $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions, $ttcNumber);
+		$font = null;
+		$s = file_get_contents($filePath);
+		list(, $ttfcount) = unpack("N", substr($s, 8, 4));
+		if ($ttcNumber >= $ttfcount)
+			break;
+		list(, $ttfoffset) = unpack("N", substr($s, 0xc + $ttcNumber * 4, 4));
+		list(, $ttftablecount) = unpack("n", substr($s, $ttfoffset + 4, 2));
+		$bits = 0;
+		$range = 1;
+		while ($range * 2 <= $ttftablecount) {
+			$range *= 2;
+			$bits++;
+		}
+		$s2 = pack("CCCCnnnn", 0, 1, 0, 0, $ttftablecount, $range * 16, $bits, $ttftablecount * 16 - $range * 16);
+		$s3 = "";
+#die("ttftablecount:".$ttftablecount);
+		for ($i=0; $i<$ttftablecount; $i++) {
+			$name = substr($s, $ttfoffset + 0xc + 0x10 * $i, 4);
+			list(, $sum, $offset, $length) = unpack("N3", substr($s, $ttfoffset + 0xc + 0x10 * $i + 4, 12));
+#die("name(".$name.") offset(".$offset.") length(".$length.")");
+			$s2 .= $name.pack("NNN", $sum, (0xc + $ttftablecount * 16 + strlen($s3)), $length);
+			$s3 .= substr($s, $offset, $length);
+		}
+#die("s2(".strlen($s2).") s3(".strlen($s3).")");
+		
+		$dataSource = new Zend_Pdf_FileParserDataSource_String($s2.$s3);
+                $font = Zend_Pdf_Font::_extractTrueTypeFont($dataSource, $embeddingOptions);
                 break;
 
             default:
